@@ -1,0 +1,64 @@
+package main.java.ebay.controllers;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import main.java.ebay.data.Employee;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class TestController {
+	String dbURL = "jdbc:mysql://localhost:3306/employee_data";
+    String username ="root";
+    String password = "werspartan";
+
+    
+    @RequestMapping(method = RequestMethod.GET, value = "/employee")
+    public Employee greeting(@RequestParam(value="name", required=false, defaultValue="World") String name) {
+    	Employee emp = new Employee();
+    	Connection dbCon = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+       
+        String query ="select * from employee";
+       
+        try {
+        	try {
+				Class.forName("oracle.jdbc.OracleDriver");
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+            //getting database connection to MySQL server
+            dbCon = DriverManager.getConnection(dbURL, username, password);
+           
+            //getting PreparedStatment to execute query
+            stmt = dbCon.prepareStatement(query);
+           
+            //Resultset returned by query
+            rs = stmt.executeQuery(query);
+           
+            while(rs.next()){
+            	emp.setName(rs.getString(3));
+            	emp.setEmail(rs.getString(2));
+             
+            }
+           
+        } catch (SQLException ex) {
+        	ex.printStackTrace();
+           
+        } finally{
+           //close connection ,stmt and resultset here
+        }
+    	
+        return emp;
+    }
+    
+}

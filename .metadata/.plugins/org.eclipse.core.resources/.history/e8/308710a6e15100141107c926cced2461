@@ -1,0 +1,16 @@
+package ebay.dao;
+
+import java.io.IOException;
+import java.sql.SQLException;
+
+import ebay.data.Employee;
+import ebay.data.UserSignUp;
+
+
+public interface EmployeeDataDao {
+	
+	public Employee getEmployee() throws IOException,SQLException;
+	
+	public void createUser(UserSignUp userData);
+
+}

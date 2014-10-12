@@ -1,0 +1,11 @@
+package ebay.data;
+
+public class LoginBean {
+	
+	private int empId;
+	
+	private String password;
+	
+	
+
+}

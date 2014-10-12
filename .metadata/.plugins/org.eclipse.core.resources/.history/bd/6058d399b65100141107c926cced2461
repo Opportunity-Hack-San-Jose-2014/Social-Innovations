@@ -1,0 +1,33 @@
+package ebay.utilities;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+
+public class DatabaseConnection {
+	
+	
+	public static Connection getConnection()
+	{
+		Connection connection;
+		 try {
+	        	try{
+	        	Class.forName("com.mysql.jdbc.Driver");
+	        	}
+	        	catch(Exception e)
+	        	{
+	        		e.printStackTrace();
+	        	}
+	            //getting database connection to MySQL server
+	        	connection = DriverManager.getConnection(dbURL, username, password);
+		 }
+		 catch(Exception ex)
+		 {
+			 
+		 }
+		 
+		 retun connection;
+	}
+	
+	
+
+}

@@ -1,0 +1,32 @@
+package ebay.dao;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.springframework.web.bind.annotation.PathVariable;
+
+import ebay.data.Employee;
+import ebay.data.LoginBean;
+import ebay.data.Participant;
+import ebay.data.UserSignUp;
+import ebay.exception.UserDataException;
+
+
+public interface EmployeeDataDao {
+	
+	public Employee getEmployee() throws IOException,SQLException;
+	
+	public void createUser(UserSignUp userData) throws IOException,SQLException,UserDataException;
+	
+	public boolean authorizeUser(LoginBean loginBean);
+	
+	public String insertHistoricData(Map<String, Participant> pMap,
+			Set<String> locationSet, String eventName, int year)
+			throws IOException, SQLException;
+	
+	public List<String> getEvents(String eventid);
+
+}

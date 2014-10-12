@@ -1,0 +1,215 @@
+package ebay.dao;
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Map;
+import java.util.Set;
+
+import org.springframework.stereotype.Repository;
+
+import ebay.data.Employee;
+import ebay.data.Participant;
+import ebay.data.UserSignUp;
+import ebay.utilities.ApplicationUtility;
+import ebay.utilities.DatabaseConnection;
+
+@Repository
+public class EmployeeDataDaoImpl implements EmployeeDataDao {
+
+	@Override
+	public Employee getEmployee() throws IOException, SQLException {
+		// TODO Auto-generated method stub
+
+		Employee emp = new Employee();
+		Connection dbCon = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		try {
+
+			dbCon = DatabaseConnection.getConnection();
+			stmt = dbCon.prepareStatement(ApplicationUtility
+					.getPropertyValue("getEmployee"));
+			rs = stmt.executeQuery(ApplicationUtility
+					.getPropertyValue("getEmployee"));
+
+			while (rs.next()) {
+				emp.setFirstName(rs.getString(4));
+				emp.setEmail(rs.getString(3));
+			}
+
+		} catch (SQLException ex) {
+			ex.printStackTrace();
+
+		} finally {
+			DatabaseConnection.closeConnection(dbCon);
+		}
+
+		return emp;
+	}
+
+	public String insertHistoricData(Map<String, Participant> pMap,
+			Set<String> locationSet, String eventName, int year)
+			throws IOException, SQLException {
+
+		String result = "fail";
+		Connection dbCon = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		try {
+
+			int eventId = 1;
+
+			dbCon = DatabaseConnection.getConnection();
+			dbCon.setAutoCommit(false);
+			String sql = "select max(event_id) from event";
+			stmt = dbCon.prepareStatement(sql);
+			rs = stmt.executeQuery();
+			try {
+				rs.next();
+				eventId = ((int) rs.getObject(1)) + 1;
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+			sql = "insert into event (event_name,event_id,event_year) values (?,?,?)";
+			stmt = dbCon.prepareStatement(sql);
+			int colIndex = 1;
+			stmt.setString(colIndex++, eventName);
+			stmt.setInt(colIndex++, eventId);
+			stmt.setInt(colIndex++, year);
+			stmt.executeUpdate();
+			sql = "insert into location (event_id,event_location) values (?,?)";
+			stmt = dbCon.prepareStatement(sql);
+			for (String loc : locationSet) {
+				colIndex = 1;
+				stmt.setInt(colIndex++, eventId);
+				stmt.setString(colIndex, loc);
+				stmt.addBatch();
+			}
+			stmt.executeBatch();
+			sql = "select DISTINCT(emp_id) from employee";
+			stmt = dbCon.prepareStatement(sql);
+			rs = stmt.executeQuery();
+			while (rs.next()) {
+				String key = rs.getString(1);
+				System.out.println("key: " + key);
+				if (pMap.keySet().contains(key)) {
+					System.out.println("removing");
+					pMap.remove(key);
+				}
+			}
+			if (pMap.size() > 0) {
+				sql = "insert into employee(emp_id,emp_fname,emp_lname,emp_email) values (?,?,?,?)";
+				stmt = dbCon.prepareStatement(sql);
+				for (Participant p : pMap.values()) {
+					colIndex = 1;
+					stmt.setString(colIndex++, p.getEmpId());
+					stmt.setString(colIndex++, p.getFname());
+					stmt.setString(colIndex++, p.getLname());
+					stmt.setString(colIndex++, p.getEmailId());
+					stmt.addBatch();
+				}
+				stmt.executeBatch();
+			}
+
+			dbCon.commit();
+			result = "success";
+		} catch (Exception ex) {
+			ex.printStackTrace();
+
+		} finally {
+			// close connection ,stmt and resultset here
+			/*
+			 * rs.close(); stmt.close();
+			 */
+
+			DatabaseConnection.closeConnection(dbCon);
+
+		}
+		return result;
+	}
+
+	@Override
+	public void createUser(UserSignUp userData) throws SQLException {
+		// TODO Auto-generated method stub
+		String result = "fail";
+		Connection dbCon = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		if (!checkExistingUser(userData)) {
+			try {
+
+				dbCon = DatabaseConnection.getConnection();
+				dbCon.setAutoCommit(false);
+				String sql = "insert into user (emp_id,password,level) values(?,?,?)";
+				stmt = dbCon.prepareStatement(sql);
+				stmt.setInt(1, userData.getEmpId());
+				stmt.setString(2, userData.getPassword());
+				stmt.setInt(3, Integer.parseInt(ApplicationUtility.getPropertyValue("general")));
+				stmt.executeQuery();
+				
+				sql ="select * from employee where emp_id=?";
+				stmt = dbCon.prepareStatement(sql);
+				stmt.setInt(1, userData.getEmpId());
+				rs =stmt.executeQuery();
+				
+				if(rs==null){
+					
+					sql = "insert into employee (emp_id,emp_email,emp_fname,emp_lname) values(?,?,?,?)";
+					stmt = dbCon.prepareStatement(sql);
+					stmt.setInt(1, userData.getEmpId());
+					stmt.setString(2, userData.getEmail());
+					stmt.setString(3, userData.getFirstName());
+					stmt.setString(4, userData.getLastName());
+					rs =stmt.executeQuery();
+				}
+				
+				} 
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+			finally {
+					DatabaseConnection.closeConnection(dbCon);
+				}
+			} 
+			}
+		
+	
+
+	private boolean checkExistingUser(UserSignUp userData) {
+		String result = "fail";
+		Connection dbCon = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+			try {
+
+				dbCon = DatabaseConnection.getConnection();
+				dbCon.setAutoCommit(false);
+				String sql = "select * from user where emp_id=?";
+				stmt = dbCon.prepareStatement(sql);
+				stmt.setInt(1, userData.getEmpId());
+				rs = stmt.executeQuery();
+				try {
+					if(rs==null)
+						return false;
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				} finally {
+
+					DatabaseConnection.closeConnection(dbCon);
+
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		
+
+		return true;
+	}
+
+}

@@ -1,0 +1,9 @@
+package ebay.utilities;
+
+public final class ApplicationUtility {
+	
+	public final static String GET_USER ="select * from employee";
+	
+	
+
+}

@@ -1,0 +1,21 @@
+package main.java.ebay.data;
+
+
+public class Employee {
+
+    private  String name;
+    private  String email;
+
+    public Employee(long name, String email) {
+        this.name = name;
+        this.eamil = email;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public String getContent() {
+        return content;
+    }
+}

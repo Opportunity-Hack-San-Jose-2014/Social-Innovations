@@ -1,0 +1,5 @@
+package ebay.exception;
+
+public class UserDataException extends Exception{
+
+}

@@ -1,0 +1,5 @@
+package ebay.dao;
+
+public class EmployeeDataDaoImpl {
+
+}

@@ -1,0 +1,9 @@
+#Database Configuration
+
+connectionUrl=jdbc:mysql://localhost:3306/employee_data
+username="root"
+password="werspartan"
+
+#Queries
+
+getEmployee=select * from employee

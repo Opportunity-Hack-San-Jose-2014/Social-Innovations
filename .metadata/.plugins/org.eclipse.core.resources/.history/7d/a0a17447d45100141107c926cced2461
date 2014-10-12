@@ -1,0 +1,27 @@
+
+http://stackoverflow.com/questions/2353818/how-do-i-get-started-with-node-js
+
+https://github.com/maxogden/art-of-node/
+
+nodeschool.io
+
+best place to start coding in node.js
+
+
+
+
+Below links are lil boring -- if you want to go in detail then and then read this...its basic info about node.js architecture.
+
+http://blog.mixu.net/2011/02/01/understanding-the-node-js-event-loop/
+
+every process can be treatedd as the serer and can hande event based requests
+
+every applicaiton runs on the single process and register event loop and handlers to os for the functionality execution.
+
+http://web.stanford.edu/~ouster/cgi-bin/papers/threads.pdf
+
+http://www.w3.org/Library/User/Architecture/Events.html
+
+http://code.danyork.com/2011/01/25/node-js-doctors-offices-and-fast-food-restaurants-understanding-event-driven-programming/
+
+http://www.nodebeginner.org/

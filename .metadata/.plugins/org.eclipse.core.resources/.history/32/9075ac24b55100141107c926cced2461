@@ -1,0 +1,7 @@
+package ebay.utilities;
+
+public class DatabaseConnection {
+	
+	public static final String connectionUrl ="jdbc:mysql://localhost:3306/employee_data";
+
+}

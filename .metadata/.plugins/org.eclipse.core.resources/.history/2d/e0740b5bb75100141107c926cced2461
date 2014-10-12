@@ -1,0 +1,7 @@
+package ebay.dao;
+
+public interface EmployeeDataDao {
+	
+	public Employee getEmployee();
+
+}

@@ -1,0 +1,27 @@
+package ebay.data;
+
+public class EventData {
+private String eventId;
+private String event_name;
+private String eventYear;
+public String getEventId() {
+	return eventId;
+}
+public void setEventId(String eventId) {
+	this.eventId = eventId;
+}
+public String getEvent_name() {
+	return event_name;
+}
+public void setEvent_name(String event_name) {
+	this.event_name = event_name;
+}
+public String getEventYear() {
+	return eventYear;
+}
+public void setEventYear(String eventYear) {
+	this.eventYear = eventYear;
+}
+
+
+}

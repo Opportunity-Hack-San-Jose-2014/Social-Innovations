@@ -1,0 +1,23 @@
+package ebay.utilities;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
+public class ApplicationUtility {
+
+	public  static String getPropertyValue(String propertyName) throws IOException {
+
+		String result = "";
+		Properties prop = new Properties();
+		String propFileName = "Resources/config.properties";
+		prop.load(new FileInputStream(propFileName));
+		// get the property value and print it out
+		result = prop.getProperty(propertyName);
+		
+		return result;
+	}
+
+}

@@ -1,0 +1,290 @@
+package ebay.utilities;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import ebay.data.Participant;
+
+public class ExcelReader {
+
+	public Map<String, Object> readEventData(XSSFWorkbook workbook) {
+
+		Map<String, Participant> pMap = null;
+		Set<String> locationSet = null;
+		try {
+
+			XSSFSheet sheet = workbook.getSheetAt(0);
+
+			Map<String, Integer> map = getColumnMap(sheet.getRow(0));// assuming
+																		// header
+																		// are
+																		// on
+																		// the
+																		// 1st
+																		// row
+
+			int maxRow = sheet.getPhysicalNumberOfRows();
+			XSSFRow row = null;
+			XSSFCell cell = null;
+
+			for (int rownum = 1; rownum <= maxRow; rownum++) {
+				Participant participant = new Participant();
+				if (pMap == null) {
+					// participantList = new ArrayList<Participant>();
+					pMap = new HashMap<String, Participant>();
+					locationSet = new HashSet<String>();
+				}
+				row = sheet.getRow(rownum);
+
+				cell = row.getCell(map.get("empId"));
+
+				if (pMap.containsKey(getCellValue(cell))) {
+					continue;
+				}
+
+				participant.setEmpId(getCellValue(cell));
+
+				// StringBuffer name = new StringBuffer();
+				if (!map.containsKey("fullName")) {
+					cell = row.getCell(map.get("fName"));
+					participant.setFname(getCellValue(cell));
+
+					// if (pMap.containsKey("lName")) {
+					cell = row.getCell(map.get("lName"));
+					participant.setLname(getCellValue(cell));
+					// }
+				} else {
+					cell = row.getCell(map.get("fullName"));
+					String value = getCellValue(cell);
+					String[] names = value.split("\\s+");
+					participant.setFname(names[0]);
+					participant.setLname(names[1]);
+				}
+
+				cell = row.getCell(map.get("location"));
+				String location = getCellValue(cell);
+
+				cell = row.getCell(map.get("email"));
+				participant.setEmailId(getCellValue(cell));
+				// System.out.println(participant);
+				if (participant.isEmpty()) {
+					break;
+				}
+				locationSet.add(location);
+				pMap.put(participant.getEmpId(), participant);
+			}
+
+			/*
+			 * for (String s : pMap.keySet()) { System.out.println(pMap.get(s));
+			 * }
+			 */
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		resultMap.put("location", locationSet);
+		resultMap.put("participant", pMap);
+		return resultMap;
+	}
+
+	private Map<String, Integer> getColumnMap(XSSFRow row) {
+		Map<String, Integer> result = new HashMap<String, Integer>();
+		XSSFCell cell = null;
+
+		Map<String, String> colNameMap = new HashMap<String, String>();
+		colNameMap.put("employee id", "empId");
+		colNameMap.put("employeeid", "empId");
+
+		colNameMap.put("employee first name", "fName");
+		colNameMap.put("employee first", "fName");
+
+		colNameMap.put("employee last name", "lName");
+		colNameMap.put("employee last", "lName");
+
+		colNameMap.put("employee work city", "location");
+		colNameMap.put("state", "location");
+
+		colNameMap.put("employeee email", "email");
+		colNameMap.put("email address", "email");
+
+		colNameMap.put("full name", "fullName");
+
+		for (int colnum = 0; colnum <= row.getLastCellNum(); colnum++) {
+			cell = row.getCell(colnum);
+			if (cell != null) {
+				String value = getCellValue(cell);
+				for (String key : colNameMap.keySet()) {
+					if (value != null && key.equals(value.toLowerCase())) {
+						result.put(colNameMap.get(key), colnum);
+					}
+				}
+			}
+		}
+		/*
+		 * for(String s : result.keySet()){
+		 * System.out.println(s+"  "+result.get(s)); }
+		 */
+		return result;
+	}
+
+	public Map<String, Object> readYearData(XSSFWorkbook workbook) {
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		try {
+			/*
+			 * FileInputStream file = new FileInputStream( new File(
+			 * "C:/Users/Jvalant/Downloads/2013 Participation Tracking(1).xlsx"
+			 * ));
+			 * 
+			 * // Create Workbook instance holding reference to .xlsx file
+			 * XSSFWorkbook workbook = new XSSFWorkbook(file);
+			 */
+
+			// Get first/desired sheet from the workbook
+			XSSFSheet sheet = workbook.getSheetAt(0);
+
+			Map<String, Integer> map = getColumnMap(sheet.getRow(0));// assuming
+																		// header
+																		// are
+																		// on
+																		// the
+																		// 1st
+																		// row
+			List<Integer> list = new ArrayList<Integer>(map.values());
+			Collections.sort(list);
+			int eventStartIndex = list.get(list.size() - 1) + 1;
+			int maxRow = sheet.getPhysicalNumberOfRows();
+			XSSFRow row = null;
+			XSSFCell cell = null;
+
+			Map<String, Participant> pMap = null;
+			Map<Integer, List<String>> eventUserMap = new HashMap<Integer, List<String>>();
+			Map<String, List<Integer>> eventLocationMap = new HashMap<String, List<Integer>>();
+			Map<String, Integer> eventMap = new HashMap<String, Integer>();
+
+			row = sheet.getRow(0);
+			for (int i = eventStartIndex; i <= row.getLastCellNum(); i++) {
+				cell = row.getCell(i);
+				eventMap.put(getCellValue(cell), i);
+				eventUserMap.put(i, new ArrayList<String>());
+			}
+			for (int rownum = 1; rownum <= maxRow; rownum++) {
+				Participant participant = new Participant();
+				if (pMap == null) {
+					// participantList = new ArrayList<Participant>();
+					pMap = new HashMap<String, Participant>();
+				}
+				row = sheet.getRow(rownum);
+
+				cell = row.getCell(map.get("empId"));
+
+				if (pMap.containsKey(getCellValue(cell))) {
+					continue;
+				}
+
+				participant.setEmpId(getCellValue(cell));
+
+				if (!map.containsKey("fullName")) {
+					cell = row.getCell(map.get("fName"));
+					participant.setFname(getCellValue(cell));
+
+					// if (pMap.containsKey("lName")) {
+					cell = row.getCell(map.get("lName"));
+					participant.setLname(getCellValue(cell));
+					// }
+				} else {
+					cell = row.getCell(map.get("fullName"));
+					String value = getCellValue(cell);
+					String[] names = value.split("\\s+");
+					participant.setFname(names[0]);
+					participant.setLname(names[1]);
+				}
+
+				cell = row.getCell(map.get("email"));
+				participant.setEmailId(getCellValue(cell));
+				if (participant.isEmpty()) {
+					break;
+				}
+				pMap.put(participant.getEmpId(), participant);
+				for (int i = eventStartIndex; i <= row.getLastCellNum(); i++) {
+					cell = row.getCell(i);
+					String value = getCellValue(cell);
+					if (value != null && !value.equals("")) {
+						List<String> tempList = eventUserMap.get(i);
+						tempList.add(participant.getEmpId());
+
+						cell = row.getCell(map.get("location"));
+						String location = getCellValue(cell);
+
+						List<Integer> locList = null;
+						if (eventLocationMap.containsKey(location)) {
+							locList = eventLocationMap.get(location);
+							locList.add(Integer.valueOf(i));
+						} else {
+							locList = new ArrayList<Integer>();
+							locList.add(Integer.valueOf(i));
+							eventLocationMap.put(location, locList);
+						}
+					}
+				}
+			}
+			System.out.println();
+
+			resultMap.put("participant", pMap);
+			resultMap.put("eventLocationMap", eventLocationMap);
+			resultMap.put("eventMap", eventMap);
+			resultMap.put("eventUserMap", eventUserMap);
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		return resultMap;
+	}
+
+	public String getCellValue(Cell cell) {
+		String cellValue = null;
+		if (cell != null) {
+			switch (cell.getCellType()) {
+
+			case Cell.CELL_TYPE_STRING:
+				cellValue = cell.getStringCellValue();
+				break;
+
+			case Cell.CELL_TYPE_NUMERIC:
+				if (DateUtil.isCellDateFormatted(cell)) {
+					cellValue = cell.getDateCellValue().toString();
+				} else {
+					cellValue = Integer.toString((int) cell
+							.getNumericCellValue());
+				}
+				break;
+
+			case Cell.CELL_TYPE_BLANK:
+				cellValue = "";
+				break;
+
+			case Cell.CELL_TYPE_BOOLEAN:
+				cellValue = Boolean.toString(cell.getBooleanCellValue());
+				break;
+
+			default:
+				cellValue = "";
+			}
+
+		} else {
+			cellValue = "";
+		}
+		return cellValue;
+	}
+}

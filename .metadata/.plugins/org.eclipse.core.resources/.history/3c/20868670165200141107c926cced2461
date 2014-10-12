@@ -1,0 +1,6 @@
+package ebay.data;
+
+public class FilterResponseData {
+private EventData eventData;
+private Participant participant;
+}
